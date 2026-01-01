@@ -27,7 +27,6 @@ export default function Checkout() {
   const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(false);
   
-  // User details state
   const [userDetails, setUserDetails] = useState({
     name: "",
     email: "",
@@ -35,7 +34,6 @@ export default function Checkout() {
     address: ""
   });
 
-  // Helper functions for avatar
   const getInitials = (name) => {
     if (!name) return "U";
     const names = name.split(' ');
@@ -63,11 +61,9 @@ export default function Checkout() {
   useEffect(() => {
     const loadCartAndUser = async () => {
       try {
-        // Load cart
         const cartRes = await API.get("/user/cart");
         setCart(cartRes.data.cart || []);
         
-        // Load user profile details
         const profileRes = await API.get("/user/auth/me");
         if (profileRes.data.user) {
           const user = profileRes.data.user;
@@ -95,7 +91,6 @@ export default function Checkout() {
   const shippingCost = total > 0 ? 5.00 : 0;
   const grandTotal = total + shippingCost;
 
-  // Check if user has address
   const hasAddress = userDetails.address && userDetails.address.trim() !== "";
 
   const placeOrder = async () => {
@@ -104,8 +99,7 @@ export default function Checkout() {
       return;
     }
     
-    // Check if address is filled
-    if (!hasAddress) {
+   if (!hasAddress) {
       toast.error("Please add your shipping address in profile before placing order");
       return;
     }
@@ -139,7 +133,6 @@ export default function Checkout() {
       return;
     }
     
-    // Check if address is filled
     if (!hasAddress) {
       toast.error("Please add your shipping address in profile before placing order");
       return;
@@ -204,7 +197,6 @@ export default function Checkout() {
             setIsSuccess(true);
             toast.success("Payment successful! Order placed.");
             
-            // Clear cart from state
             setCart([]);
             
             setTimeout(() => {

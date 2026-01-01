@@ -7,7 +7,6 @@ import Navbar from "./components/Navbar";
 import { Toaster } from 'react-hot-toast';
 
 
-// Regular user pages
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -20,7 +19,6 @@ import Profile from './pages/Profile';
 import Wishlist from './pages/Wishlist';
 
 
-// Admin pages
 import AdminLogin from './admin/pages/AdminLogin';
 import Dashboard from './admin/pages/Dashboard';
 import AdminUsers from './admin/pages/AdminUsers';

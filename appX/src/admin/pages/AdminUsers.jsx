@@ -75,7 +75,6 @@ export default function AdminUsers() {
     setExpandedRows(prev => ({ ...prev, [userId]: !prev[userId] }));
   };
 
-  // Workings/Logic (Filtering & Pagination)
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||

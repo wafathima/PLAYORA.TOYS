@@ -23,7 +23,6 @@ const Sidebar = () => {
       
       localStorage.clear();
       
-      // Preserving user data if needed for your auth logic
       if (userToken) localStorage.setItem('token', userToken);
       if (userData) localStorage.setItem('user', userData);
       

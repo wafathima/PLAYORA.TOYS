@@ -1,9 +1,3 @@
-// import API from "./axios";
-
-// export const adminLogin = (data) =>
-//   API.post("/admin/auth/login", data);
-
-// src/api/adminAuth.js
 import { adminAPI } from "./axios";
 
 export const adminLogin = async (email, password) => {

@@ -162,7 +162,6 @@ export default function AdminLogin() {
         </div>
       </motion.div>
 
-      {/* Adding custom shimmer animation for the button */}
       <style jsx>{`
         @keyframes shimmer {
           100% { transform: translateX(100%); }

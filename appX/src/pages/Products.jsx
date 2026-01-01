@@ -77,7 +77,6 @@ export default function Products() {
   };
 
   const generateRandomRating = (id) => {
-    // seeded random based on id for consistency
     const seed = id.charCodeAt(0) + id.charCodeAt(id.length - 1);
     return (4.0 + (seed % 10) / 10).toFixed(1);
   };

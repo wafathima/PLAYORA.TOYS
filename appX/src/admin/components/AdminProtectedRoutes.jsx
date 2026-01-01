@@ -14,11 +14,9 @@ const AdminProtectedRoute = ({ children }) => {
   }
 
   if (!admin) {
-    // Redirect to admin login if not authenticated
     return <Navigate to="/admin/login" replace />;
   }
 
-  // Wrap all admin pages with AdminLayout
   return <AdminLayout>{children}</AdminLayout>;
 };
 
