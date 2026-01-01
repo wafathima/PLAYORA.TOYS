@@ -122,7 +122,7 @@ export default function AdminOrders() {
           <h1 className="text-3xl font-bold text-white tracking-tight">Orders</h1>
           <p className="text-slate-400 mt-1">
             <span className="text-indigo-400 font-semibold">{filteredOrders.length}</span> orders found • 
-            <span className="text-emerald-400 font-semibold ml-1">${totalRevenue.toLocaleString()}</span> revenue
+            <span className="text-emerald-400 font-semibold ml-1">₹{totalRevenue.toLocaleString()}</span> revenue
           </p>
         </div>
         <div className="flex gap-3">
@@ -211,7 +211,7 @@ export default function AdminOrders() {
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <p className="text-sm font-bold text-white">${order.totalAmount.toFixed(2)}</p>
+                      <p className="text-sm font-bold text-white">₹{order.totalAmount.toFixed(2)}</p>
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded bg-${paymentStatuses[order.paymentStatus]?.color}-500/10 text-${paymentStatuses[order.paymentStatus]?.color}-400 mt-1 inline-block`}>
                         {order.paymentStatus}
                       </span>
@@ -253,7 +253,7 @@ export default function AdminOrders() {
                                       <p className="text-xs text-slate-500">Qty: {item.quantity}</p>
                                     </div>
                                   </div>
-                                  <p className="text-sm font-bold text-indigo-400">${item.price.toFixed(2)}</p>
+                                  <p className="text-sm font-bold text-indigo-400">₹{item.price.toFixed(2)}</p>
                                 </div>
                               ))}
                             </div>

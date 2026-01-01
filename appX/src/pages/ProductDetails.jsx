@@ -83,9 +83,14 @@ export default function ProductDetails() {
     );
   }
 
+  // const productImages = [
+  //   product.image ? `http://localhost:5000${product.image}` : "https://via.placeholder.com/600x600",
+  // ];
+
   const productImages = [
-    product.image ? `http://localhost:5000${product.image}` : "https://via.placeholder.com/600x600",
-  ];
+  product.image ? (product.image.startsWith('http') ? product.image : `http://localhost:5000${product.image}`) : "https://via.placeholder.com/600x600",
+];
+
 
   return (
     <div className="min-h-screen bg-[#FCFCFD] pb-20">

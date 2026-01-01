@@ -243,10 +243,15 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-[#FBFCFE] pb-20">
-      {/* Elegant Header Section */}
-      <div className="bg-slate-900 pt-16 pb-28 px-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-indigo-500/10 to-transparent"></div>
-        <div className="max-w-6xl mx-auto relative z-10">
+      {/* SAME HEADER BACKGROUND AS WISHLIST */}
+      <div className="h-64 bg-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500 via-purple-500 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FBFCFE] to-transparent"></div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-6 -mt-32 relative z-10">
+        {/* Header Section */}
+        <div className="mb-12">
           <button
             onClick={() => navigate("/cart")}
             className="flex items-center gap-2 text-indigo-300 hover:text-white mb-8 transition-all font-medium group"
@@ -271,9 +276,7 @@ export default function Checkout() {
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-6 -mt-12 relative z-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2 space-y-8">
             {/* User Details Card */}
@@ -377,11 +380,18 @@ export default function Checkout() {
                     <div key={item._id || index} className="flex items-center justify-between p-6 group">
                       <div className="flex items-center gap-6">
                         <div className="relative w-20 h-24 flex-shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
-                          <img
+                          {/* <img
                             src={item.product?.image ? `http://localhost:5000${item.product.image}` : "https://via.placeholder.com/400x300"}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             alt={item.product?.name}
-                          />
+                          /> */}
+                           
+                            <img
+                  src={item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `http://localhost:5000${item.product.image}`) : "https://via.placeholder.com/400x500"}
+                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                  alt={item.product.name}
+                />
+
                         </div>
                         <div>
                           <h3 className="font-bold text-slate-900">{item.product?.name}</h3>

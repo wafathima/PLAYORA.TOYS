@@ -124,20 +124,25 @@ export default function Orders() {
 
   return (
     <div className="min-h-screen bg-[#FBFCFE] pb-20">
-      {/* Hero Header */}
-      <div className="bg-slate-900 pt-20 pb-24 px-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/4 h-full bg-indigo-500/10 blur-[100px]"></div>
-        <div className="max-w-6xl mx-auto relative z-10">
+      {/* SAME HEADER BACKGROUND AS WISHLIST */}
+      <div className="h-64 bg-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500 via-purple-500 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FBFCFE] to-transparent"></div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-6 -mt-32 relative z-10">
+        {/* Header Section */}
+        <div className="mb-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>
               <h1 className="text-4xl md:text-5xl font-serif text-white tracking-tight">Purchase History</h1>
-              <p className="text-slate-400 mt-2 font-medium">Track and manage your luxury acquisitions</p>
+              <p className="text-slate-800 mt-2 font-medium">Track and manage your luxury acquisitions</p>
             </div>
 
             {orders.length > 0 && (
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2 text-white">
                 <Filter className="h-4 w-4 text-indigo-400" />
-                <span className="text-xs font-black uppercase tracking-widest text-slate-400">Filter By</span>
+                <span className="text-xs font-black uppercase tracking-widest text-slate-700">Filter By</span>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -154,9 +159,7 @@ export default function Orders() {
             )}
           </div>
         </div>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-6 -mt-10 relative z-20">
         {orders.length === 0 ? (
           <div className="bg-white rounded-[3rem] p-16 text-center shadow-sm border border-slate-100">
             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -246,11 +249,18 @@ export default function Orders() {
                           {order.items.map((item) => (
                             <div key={item._id} className="bg-white rounded-3xl p-4 border border-slate-100 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
                                 <div className="w-20 h-24 rounded-2xl overflow-hidden bg-slate-50 border border-slate-50 flex-shrink-0">
-                                    <img
+                                    {/* <img
                                         src={item.product?.image ? `http://localhost:5000${item.product.image}` : "https://via.placeholder.com/150"}
                                         className="w-full h-full object-cover"
                                         alt={item.product?.name}
-                                    />
+                                    /> */}
+                                      
+                                       <img
+                  src={item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `http://localhost:5000${item.product.image}`) : "https://via.placeholder.com/400x500"}
+                  className="w-full h-full object-cover "
+                  alt={item.product.name}
+                />
+
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="font-bold text-slate-900 truncate leading-tight mb-1">{item.product?.name || "Premium Item"}</p>

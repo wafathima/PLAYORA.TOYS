@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { adminAPI } from "../../api/axios";
 import {
-  Search, Filter, Edit, Trash2, Eye,
+  Search, Filter, Edit, Trash2, 
   Package, DollarSign, Tag, Box, Plus, Loader2, AlertCircle, 
   ChevronLeft, ChevronRight, RefreshCw
 } from "lucide-react";
@@ -220,7 +220,6 @@ export default function AdminProducts() {
                     <div className="flex justify-end gap-2">
                       <button onClick={() => navigate(`/admin/products/edit/${product._id}`)} className="p-2 hover:bg-indigo-500/20 text-indigo-400 rounded-lg transition-colors"><Edit size={18}/></button>
                       <button onClick={() => openDeleteModal(product._id, product.name)} className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"><Trash2 size={18}/></button>
-                      <button onClick={() => navigate(`/product/${product._id}`)} className="p-2 hover:bg-slate-700 text-slate-400 rounded-lg transition-colors"><Eye size={18}/></button>
                     </div>
                   </td>
                 </tr>

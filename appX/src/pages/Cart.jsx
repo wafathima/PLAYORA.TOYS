@@ -83,10 +83,15 @@ export default function Cart() {
 
   return (
     <div className="min-h-screen bg-[#FBFCFE] pb-24">
-      {/* Decorative Header */}
-      <div className="bg-slate-900 pt-16 pb-32 px-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-indigo-500/10 to-transparent"></div>
-        <div className="max-w-7xl mx-auto relative z-10">
+      {/* SAME HEADER BACKGROUND AS WISHLIST */}
+      <div className="h-64 bg-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500 via-purple-500 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FBFCFE] to-transparent"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 -mt-32 relative z-10">
+        {/* Header Section */}
+        <div className="mb-12">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-indigo-300 hover:text-white mb-8 transition-all font-medium group"
@@ -105,15 +110,13 @@ export default function Cart() {
                 <ShoppingBag className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-xs font-black uppercase tracking-widest text-slate-500">Subtotal</p>
-                <p className="text-xl font-bold text-white leading-none">₹{totalAmount.toLocaleString()}</p>
+                <p className="text-xs font-black uppercase tracking-widest text-white">Subtotal</p>
+                <p className="text-xl font-bold text-slate-500 leading-none">₹{totalAmount.toLocaleString()}</p>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-6 -mt-16 relative z-20">
         {cart.length === 0 ? (
           <div className="bg-white rounded-[3rem] shadow-xl shadow-slate-200/50 border border-slate-50 p-20 text-center max-w-3xl mx-auto">
             <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 border border-slate-100">
@@ -151,11 +154,18 @@ export default function Cart() {
                           <div className="md:col-span-6">
                             <div className="flex items-center gap-6">
                               <div className="relative w-24 h-32 flex-shrink-0 overflow-hidden rounded-2xl border border-slate-100">
-                                <img
+                                {/* <img
                                   src={item.product.image ? `http://localhost:5000${item.product.image}` : "https://via.placeholder.com/400x500"}
                                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                   alt={item.product.name}
-                                />
+                                /> */}
+
+                                 <img
+                  src={item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `http://localhost:5000${item.product.image}`) : "https://via.placeholder.com/400x500"}
+                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                  alt={item.product.name}
+                />
+                    
                               </div>
                               <div className="flex-1">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-1">{item.product.category || "Atelier"}</p>

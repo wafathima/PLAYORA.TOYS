@@ -132,11 +132,17 @@ export default function Wishlist() {
                   >
                     {/* Visual Container */}
                     <div className="relative aspect-[4/5] overflow-hidden m-2 rounded-[2rem]">
-                      <img
+                      {/* <img
                         src={item.image ? `http://localhost:5000${item.image}` : "https://via.placeholder.com/400x500"}
                         alt={item.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
+                      /> */}
+
+                      <img
+                  src={item.image ? (item.image.startsWith('http') ? item.image : `http://localhost:5000${item.image}`) : "https://via.placeholder.com/400x500"}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  alt={item.name}
+                />
                       
                       {/* Premium Glass Overlays */}
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
