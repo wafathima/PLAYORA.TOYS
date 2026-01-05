@@ -154,12 +154,6 @@ export default function Cart() {
                           <div className="md:col-span-6">
                             <div className="flex items-center gap-6">
                               <div className="relative w-24 h-32 flex-shrink-0 overflow-hidden rounded-2xl border border-slate-100">
-                                {/* <img
-                                  src={item.product.image ? `http://localhost:5000${item.product.image}` : "https://via.placeholder.com/400x500"}
-                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                  alt={item.product.name}
-                                /> */}
-
                                  <img
                   src={item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `http://localhost:5000${item.product.image}`) : "https://via.placeholder.com/400x500"}
                   className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"

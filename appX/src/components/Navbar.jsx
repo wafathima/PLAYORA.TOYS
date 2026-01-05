@@ -72,18 +72,6 @@ export default function Navbar() {
 
         {/* Center Desktop Navigation */}
         <div className="hidden md:flex items-center gap-10">
-          <Link 
-            to="/" 
-            className="text-slate-600 hover:text-indigo-600 transition-colors duration-300 font-medium text-sm tracking-wide"
-          >
-            Home
-          </Link>
-          <Link 
-            to="/products" 
-            className="text-slate-600 hover:text-indigo-600 transition-colors duration-300 font-medium text-sm tracking-wide"
-          >
-            Collections
-          </Link>
           {user?.isAdmin && (
             <Link
               to="/admin/add-product"
@@ -124,19 +112,61 @@ export default function Navbar() {
                   onClick={() => setProfileDropdown(!profileDropdown)}
                   className="flex items-center gap-2.5 pl-2 pr-1 py-1 rounded-full border border-slate-200 hover:border-indigo-300 hover:bg-white transition-all duration-300"
                 >
-                  <div className={`w-8 h-8 rounded-full overflow-hidden border border-slate-200 shadow-inner ${avatarColor} flex items-center justify-center`}>
-                    <span className="text-white text-sm font-bold">
-                      {initials}
-                    </span>
+                  {/* Profile Image - Updated to show image if exists */}
+                  <div className={`w-8 h-8 rounded-full overflow-hidden border border-slate-200 shadow-inner ${!user.profileImage ? avatarColor : 'bg-transparent'} flex items-center justify-center`}>
+                    {user.profileImage ? (
+                      <img 
+                        src={user.profileImage} 
+                        alt={user.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // If image fails to load, show initials
+                          e.target.style.display = 'none';
+                          e.target.parentElement.innerHTML = `
+                            <span class="text-white text-sm font-bold">
+                              ${initials}
+                            </span>
+                          `;
+                        }}
+                      />
+                    ) : (
+                      <span className="text-white text-sm font-bold">
+                        {initials}
+                      </span>
+                    )}
                   </div>
                   <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${profileDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {profileDropdown && (
                   <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 py-3 z-50 overflow-hidden">
-                    <div className="px-5 py-4 mb-2 bg-slate-50/50 border-b border-slate-50">
-                      <p className="font-bold text-slate-900 truncate">{user.name}</p>
-                      <p className="text-xs text-slate-500 truncate mt-0.5">{user.email}</p>
+                    {/* Dropdown Header with Profile Image */}
+                    <div className="px-5 py-4 mb-2 bg-slate-50/50 border-b border-slate-50 flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full overflow-hidden ${!user.profileImage ? avatarColor : 'bg-transparent'} flex items-center justify-center`}>
+                        {user.profileImage ? (
+                          <img 
+                            src={user.profileImage} 
+                            alt={user.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.parentElement.innerHTML = `
+                                <span class="text-white text-sm font-bold">
+                                  ${initials}
+                                </span>
+                              `;
+                            }}
+                          />
+                        ) : (
+                          <span className="text-white text-sm font-bold">
+                            {initials}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900 truncate">{user.name}</p>
+                        <p className="text-xs text-slate-500 truncate mt-0.5">{user.email}</p>
+                      </div>
                     </div>
 
                     <div className="px-2 space-y-1">
@@ -217,6 +247,32 @@ export default function Navbar() {
             <Heart className="w-5 h-5" />
             <span className="text-[10px] mt-1 font-bold uppercase tracking-tighter">Saved</span>
           </Link>
+          {user && (
+            <Link to="/profile" className="flex flex-col items-center text-slate-500 hover:text-indigo-600 transition-all">
+              <div className={`w-6 h-6 rounded-full overflow-hidden ${!user.profileImage ? avatarColor : 'bg-transparent'} flex items-center justify-center`}>
+                {user.profileImage ? (
+                  <img 
+                    src={user.profileImage} 
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = `
+                        <span class="text-white text-[10px] font-bold">
+                          ${initials}
+                        </span>
+                      `;
+                    }}
+                  />
+                ) : (
+                  <span className="text-white text-[10px] font-bold">
+                    {initials}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] mt-1 font-bold uppercase tracking-tighter">Profile</span>
+            </Link>
+          )}
         </div>
       </div>
     </header>

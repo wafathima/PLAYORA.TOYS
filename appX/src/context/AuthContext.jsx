@@ -15,9 +15,9 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
     
-    if (token && storedUser) {
+    if (token) {
       try {
-        const res = await API.get("/user/auth/me", {
+        const res = await API.get("/user/profile", {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -30,12 +30,12 @@ export const AuthProvider = ({ children }) => {
           clearAuth();
         }
       } catch (error) {
+        console.error("Auth check error:", error);
         clearAuth();
       }
     }
     setLoading(false);
   };
-
 
   const clearAuth = () => {
     localStorage.removeItem("token");
@@ -54,67 +54,173 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("user", JSON.stringify(user));
         setUser(user);
         return { success: true };
+      } else {
+        throw new Error(res.data.message || "Login failed");
       }
     } catch (error) {
-      throw new Error(error.response?.data?.message || "Login failed");
+      console.error("Login error:", error);
+      throw new Error(error.response?.data?.message || "Login failed. Please check your credentials.");
     }
   };
 
   const register = async (name, email, password) => {
-  try {
-    const res = await API.post("/user/auth/register", {
-      name,
-      email,
-      password
-    });
+    try {
+      const res = await API.post("/user/auth/register", {
+        name,
+        email,
+        password
+      });
 
-    if (res.data.success) {
-      const { token, user } = res.data;
+      if (res.data.success) {
+        const { token, user } = res.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      setUser(user);
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        setUser(user);
 
-      return { success: true };
+        return { success: true };
+      } else {
+        throw new Error(res.data.message || "Registration failed");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      throw new Error(error.response?.data?.message || "Registration failed. Please try again.");
     }
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Registration failed");
-  }
-};
-
+  };
 
   const logout = () => {
     clearAuth();
   };
 
-const updateProfile = async (profileData) => {
-  const token = localStorage.getItem("token");
+  const updateProfile = async (profileData) => {
+    const token = localStorage.getItem("token");
 
-  try {
-    const { avatar, ...dataToSend } = profileData;
+    try {
+      const res = await API.put(
+        "/user/profile",
+        profileData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.data.success) {
+        setUser(res.data.user);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        return { success: true, message: res.data.message };
+      } else {
+        return { success: false, message: res.data.message };
+      }
+    } catch (error) {
+      console.error("Update profile error:", error);
+      throw error.response?.data || error;
+    }
+  };
+
+  const changePassword = async (currentPassword, newPassword) => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const res = await API.put(
+        "/user/change-password",
+        { currentPassword, newPassword },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      return res.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  const getAddresses = async () => {
+    const token = localStorage.getItem("token");
     
-    const res = await API.put(
-      "/user/profile",
-      dataToSend, 
-      {
+    try {
+      const res = await API.get("/user/addresses", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
-    );
-
-    if (res.data.success) {
-      setUser(res.data.user);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      return { success: true, message: res.data.message };
-    } else {
-      return { success: false, message: res.data.message };
+      });
+      
+      return res.data;
+    } catch (error) {
+      throw error.response?.data || error;
     }
-  } catch (error) {
-    console.error("Update profile error:", error);
-    throw error;
-  }
-};
+  };
+
+  const addAddress = async (addressData) => {
+    const token = localStorage.getItem("token");
+    
+    try {
+      const res = await API.post("/user/addresses", addressData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (res.data.success && user) {
+        const updatedUser = { ...user, addresses: res.data.addresses };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+      
+      return res.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  const updateAddress = async (addressId, addressData) => {
+    const token = localStorage.getItem("token");
+    
+    try {
+      const res = await API.put(`/user/addresses/${addressId}`, addressData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (res.data.success && user) {
+        const updatedUser = { ...user, addresses: res.data.addresses };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+      
+      return res.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
+  const deleteAddress = async (addressId) => {
+    const token = localStorage.getItem("token");
+    
+    try {
+      const res = await API.delete(`/user/addresses/${addressId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (res.data.success && user) {
+        const updatedUser = { ...user, addresses: res.data.addresses };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+      
+      return res.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -123,10 +229,17 @@ const updateProfile = async (profileData) => {
         register,
         logout,
         loading,
-        updateProfile 
+        updateProfile,
+        changePassword,
+        getAddresses,
+        addAddress,
+        updateAddress,
+        deleteAddress,
+        refreshUser: checkAuth
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
+

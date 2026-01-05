@@ -7,7 +7,18 @@ import {
   ArrowUpRight, ArrowDownRight, Eye, Download,
   RefreshCcw, ChevronRight, Zap
 } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { adminAPI } from '../../api/axios';
+
+const graphData = [
+  { name: 'Mon', revenue: 4000 },
+  { name: 'Tue', revenue: 3000 },
+  { name: 'Wed', revenue: 5000 },
+  { name: 'Thu', revenue: 2780 },
+  { name: 'Fri', revenue: 6890 },
+  { name: 'Sat', revenue: 8390 },
+  { name: 'Sun', revenue: 9490 },
+];
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -67,7 +78,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-[#0B0F1A] text-slate-200 p-4 md:p-8 space-y-10">
       
       {/* Header Section */}
-      <div className="flex flex-col md:row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <h1 className="text-3xl font-serif font-bold text-white tracking-tight">Intelligence Console</h1>
           <p className="text-slate-500 mt-1 flex items-center gap-2">
@@ -125,6 +136,56 @@ const Dashboard = () => {
             </button>
           </motion.div>
         ))}
+      </div>
+
+      {/* 3. NEW GRAPH SECTION */}
+      <div className="bg-[#151B2C] border border-slate-800 rounded-[2.5rem] p-8">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-emerald-500" /> Revenue Analytics
+          </h2>
+          <select className="bg-slate-900 border border-slate-800 text-xs font-bold text-slate-400 rounded-lg px-3 py-1 outline-none">
+            <option>Last 7 Days</option>
+            <option>Last 30 Days</option>
+          </select>
+        </div>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={graphData}>
+              <defs>
+                <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+              <XAxis 
+                dataKey="name" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{fill: '#64748b', fontSize: 12}} 
+                dy={10}
+              />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{fill: '#64748b', fontSize: 12}}
+              />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }}
+                itemStyle={{ color: '#fff', fontSize: '12px' }}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="revenue" 
+                stroke="#6366f1" 
+                strokeWidth={3}
+                fillOpacity={1} 
+                fill="url(#colorRev)" 
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
