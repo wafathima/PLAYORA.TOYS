@@ -80,7 +80,7 @@ export default function Home() {
               className="absolute top-0 right-0 w-[85%] h-[500px] rounded-[4rem] overflow-hidden shadow-2xl shadow-slate-400/30 z-20 border-8 border-white"
             >
               <img 
-                src="img2.jpg" 
+                src="/img2.jpg" 
                 className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-[1.5s]" 
                 alt="Luxury Wooden Toys"
               />
@@ -93,7 +93,7 @@ export default function Home() {
               className="absolute bottom-8 left-0 w-[55%] h-[320px] rounded-[3rem] overflow-hidden border-[14px] border-white shadow-2xl z-30 hidden lg:block"
             >
               <img 
-                src="img1.jpg" 
+                src="/img1.jpg" 
                 className="w-full h-full object-cover" 
                 alt="Detail view"
               />
