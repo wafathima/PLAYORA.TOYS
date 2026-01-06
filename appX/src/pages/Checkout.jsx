@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import toast from "react-hot-toast";
 import { 
   CreditCard, 
   Package, 
-  Shield, 
   CheckCircle, 
   ArrowLeft,
   Truck,
@@ -21,8 +20,7 @@ import {
   Home,
   Briefcase,
   Map,
-  Plus,
-  Radio
+  Plus
 } from "lucide-react";
 
 export default function Checkout() {
@@ -43,6 +41,8 @@ export default function Checkout() {
   const [userAddresses, setUserAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
+  
+  const paypalButtonsLoaded = useRef(false);
 
   const getInitials = (name) => {
     if (!name) return "U";
@@ -155,7 +155,8 @@ export default function Checkout() {
     setLoading(true);
     try {
       const response = await API.post("/user/orders/place", {
-        address: selectedAddress || userDetails.address
+        address: selectedAddress || userDetails.address,
+        paymentMethod: "COD"
       });
       
       if (response.data.success) {
@@ -177,131 +178,124 @@ export default function Checkout() {
     }
   };
 
-  const payWithRazorpay = async () => {
-    if (cart.length === 0) {
-      toast.error("Your cart is empty!");
-      return;
+  useEffect(() => {
+    if (paymentMethod === "PAYPAL" && !paypalButtonsLoaded.current) {
+      loadPayPalSDK();
     }
-    
-    if (!hasAddress) {
-      toast.error("Please select a shipping address");
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const { data } = await API.post("/user/orders/razorpay/create", {
-        amount: grandTotal * 100,
-        currency: "INR"
-      });
+  }, [paymentMethod]);
 
-      if (!data.success) {
-        toast.error(data.message || "Payment initialization failed");
-        setLoading(false);
-        return;
-      }
+  const loadPayPalSDK = () => {
+    if (typeof window.paypal === 'undefined') {
+      const script = document.createElement('script');
+      script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}&currency=USD`;
 
-      if (typeof window.Razorpay === 'undefined') {
-        return new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-          script.async = true;
-          script.onload = () => {
-            openRazorpay(data.order);
-            resolve();
-          };
-          script.onerror = () => {
-            toast.error("Payment service unavailable. Please try COD.");
-            setLoading(false);
-            reject();
-          };
-          document.body.appendChild(script);
-        });
-      } else {
-        openRazorpay(data.order);
-      }
-    } catch (error) {
-      console.error("Payment error:", error);
-      toast.error(error.response?.data?.message || "Payment initialization failed");
-      setLoading(false);
+      script.async = true;
+      script.onload = () => {
+        initializePayPalButtons();
+        paypalButtonsLoaded.current = true;
+      };
+      script.onerror = () => {
+        toast.error("Failed to load PayPal. Please try another payment method.");
+      };
+      document.body.appendChild(script);
+    } else if (!paypalButtonsLoaded.current) {
+      initializePayPalButtons();
+      paypalButtonsLoaded.current = true;
     }
   };
 
-  const openRazorpay = (orderData) => {
-    const address = selectedAddress || userDetails.address;
-    const addressText = typeof address === 'object' 
-      ? `${address.addressLine1}, ${address.city}, ${address.state} - ${address.postalCode}`
-      : address;
+  const initializePayPalButtons = () => {
+    const container = document.getElementById('paypal-button-container');
+    if (container) {
+      container.innerHTML = '';
+    }
 
-    const options = {
-      key: process.env.REACT_APP_RAZORPAY_KEY_ID,
-      amount: orderData.amount,
-      currency: orderData.currency,
-      name: "Playora Store",
-      description: "Order Payment",
-      order_id: orderData.id,
-      handler: async (response) => {
+    if (cart.length === 0 || !hasAddress) {
+      return;
+    }
+
+    window.paypal.Buttons({
+      style: {
+        layout: 'vertical',
+        color: 'blue',
+        shape: 'rect',
+        label: 'paypal'
+      },
+      
+      createOrder: async (data, actions) => {
         try {
-          const verifyResponse = await API.post("/user/orders/razorpay/verify", {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature
+          const { data: orderData } = await API.post("/user/orders/paypal/create", {
+            amount: grandTotal,
+            currency: "USD",
+            items: cart.map(item => ({
+              name: item.product?.name,
+              quantity: item.quantity,
+              price: item.product?.price
+            }))
           });
 
-          if (verifyResponse.data.success) {
-            const orderResponse = await API.post("/user/orders/place", {
-              address: selectedAddress || userDetails.address
-            });
-            
-            if (orderResponse.data.success) {
-              setIsSuccess(true);
-              toast.success("Payment successful! Order placed.");
-              
-              setCart([]);
-              
-              setTimeout(() => {
-                navigate("/orders");
-              }, 1500);
-            } else {
-              toast.error("Order placement failed after payment");
-            }
-          } else {
-            toast.error("Payment verification failed");
+          if (!orderData.success) {
+            toast.error("Failed to create PayPal order");
+            throw new Error("PayPal order creation failed");
           }
+
+          return orderData.orderId;
         } catch (error) {
-          console.error("Verification error:", error);
-          toast.error(error.response?.data?.message || "Payment verification failed");
+          console.error("PayPal order creation error:", error);
+          toast.error("Failed to initialize payment");
+          throw error;
         }
       },
-      prefill: {
-        name: userDetails.name || "Customer",
-        email: userDetails.email || "customer@example.com",
-        contact: selectedAddress?.phone || userDetails.phone || "9999999999"
-      },
-      notes: {
-        address: addressText,
-        shipping_address: addressText
-      },
-      theme: {
-        color: "#6366f1"
-      },
-      modal: {
-        ondismiss: function() {
-          setLoading(false);
-          toast("Payment cancelled");
-        },
-        escape: false,
-        backdropclose: false
-      }
-    };
+      
+onApprove: async (data) => {
+  setLoading(true);
+  try {
+    const res = await API.post(
+      "/user/orders/paypal/capture",
+      { orderID: data.orderID }
+    );
 
-    try {
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } catch (error) {
-      console.error("Razorpay open error:", error);
-      toast.error("Could not open payment gateway");
-      setLoading(false);
+    if (res.data.success) {
+      toast.success("Payment successful!");
+      setIsSuccess(true);
+      setCart([]);
+      setTimeout(() => navigate("/orders"), 1500);
+    } else {
+      toast.error("Payment failed");
+    }
+  } catch (err) {
+    toast.error("Payment verification failed");
+  } finally {
+    setLoading(false);
+  }
+},
+
+
+      
+      onError: (err) => {
+        console.error("PayPal error:", err);
+        toast.error("Payment failed. Please try again.");
+        setLoading(false);
+      },
+      
+      onCancel: () => {
+        toast("Payment cancelled");
+        setLoading(false);
+      }
+    }).render('#paypal-button-container').catch(err => {
+      console.error("PayPal button render error:", err);
+      toast.error("Could not initialize PayPal");
+    });
+  };
+
+  const handlePaymentMethodChange = (method) => {
+    setPaymentMethod(method);
+    if (method === "PAYPAL") {
+      setTimeout(() => {
+        if (!paypalButtonsLoaded.current) {
+          loadPayPalSDK();
+        }
+      }, 100);
     }
   };
 
@@ -360,7 +354,6 @@ export default function Checkout() {
                 <div className="space-y-2">
                   <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
                   <div className="flex items-center gap-3 px-4 py-4 bg-[#FBFCFE] border border-slate-50 rounded-2xl">
-                    {/* Profile Image Display - Updated */}
                     <div className={`w-8 h-8 rounded-full overflow-hidden border border-slate-200 flex items-center justify-center ${!userDetails.profileImage ? avatarColor : 'bg-transparent'}`}>
                       {userDetails.profileImage ? (
                         <img 
@@ -368,7 +361,6 @@ export default function Checkout() {
                           alt={userDetails.name}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            // Fallback to initials if image fails to load
                             e.target.style.display = 'none';
                             const parent = e.target.parentElement;
                             parent.innerHTML = `<span class="text-white text-sm font-bold">${initials}</span>`;
@@ -586,7 +578,7 @@ export default function Checkout() {
             <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8">
               <h2 className="text-sm font-black uppercase tracking-widest text-slate-900 mb-8 flex items-center gap-3">
                 <CreditCard className="w-5 h-5 text-indigo-500" />
-                Payment Gallery
+                Payment Method
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -596,7 +588,7 @@ export default function Checkout() {
                       ? "border-indigo-500 bg-indigo-50/30" 
                       : "border-slate-100 hover:border-slate-200 bg-white"
                   }`}
-                  onClick={() => setPaymentMethod("COD")}
+                  onClick={() => handlePaymentMethodChange("COD")}
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className={`p-3 rounded-2xl ${paymentMethod === "COD" ? "bg-indigo-500 text-white" : "bg-slate-100 text-slate-400"}`}>
@@ -610,22 +602,34 @@ export default function Checkout() {
 
                 <div
                   className={`relative overflow-hidden rounded-3xl p-6 cursor-pointer transition-all duration-300 border-2 ${
-                    paymentMethod === "RAZORPAY" 
+                    paymentMethod === "PAYPAL" 
                       ? "border-indigo-500 bg-indigo-50/30" 
                       : "border-slate-100 hover:border-slate-200 bg-white"
                   }`}
-                  onClick={() => setPaymentMethod("RAZORPAY")}
+                  onClick={() => handlePaymentMethodChange("PAYPAL")}
                 >
                   <div className="flex justify-between items-start mb-4">
-                    <div className={`p-3 rounded-2xl ${paymentMethod === "RAZORPAY" ? "bg-indigo-500 text-white" : "bg-slate-100 text-slate-400"}`}>
+                    <div className={`p-3 rounded-2xl ${paymentMethod === "PAYPAL" ? "bg-indigo-500 text-white" : "bg-slate-100 text-slate-400"}`}>
                       <Lock className="w-6 h-6" />
                     </div>
-                    {paymentMethod === "RAZORPAY" && <CheckCircle className="w-5 h-5 text-indigo-500" />}
+                    {paymentMethod === "PAYPAL" && <CheckCircle className="w-5 h-5 text-indigo-500" />}
                   </div>
-                  <h3 className="font-bold text-slate-900 mb-1">Razorpay Secure</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed font-medium">Instant verification via cards, UPI or NetBanking</p>
+                  <h3 className="font-bold text-slate-900 mb-1">PayPal Secure</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed font-medium">Instant verification via PayPal balance or cards</p>
                 </div>
               </div>
+
+              {/* PayPal Button Container */}
+              {paymentMethod === "PAYPAL" && (
+                <div className="mt-6">
+                  <div id="paypal-button-container"></div>
+                  <p className="text-xs text-slate-500 text-center mt-4">
+                    {cart.length === 0 || !hasAddress 
+                      ? "Add items to cart and select address to enable PayPal" 
+                      : "You will be redirected to PayPal's secure payment page"}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -676,13 +680,10 @@ export default function Checkout() {
               </div>
 
               <button
-                onClick={() => { 
-                  if (paymentMethod === "COD") placeOrder();
-                  else payWithRazorpay();
-                }}
-                disabled={loading || cart.length === 0 || !hasAddress}
+                onClick={placeOrder}
+                disabled={loading || cart.length === 0 || !hasAddress || paymentMethod === "PAYPAL"}
                 className={`w-full flex items-center justify-center gap-3 py-5 rounded-2xl font-bold transition-all duration-300 group ${
-                  loading || cart.length === 0 || !hasAddress
+                  loading || cart.length === 0 || !hasAddress || paymentMethod === "PAYPAL"
                     ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                     : "bg-slate-900 text-white hover:bg-indigo-600 shadow-xl shadow-indigo-100 hover:scale-[1.02]"
                 }`}
@@ -691,7 +692,7 @@ export default function Checkout() {
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    Confirm & Place Order
+                    {paymentMethod === "COD" ? "Confirm & Place Order" : "Use PayPal Button Above"}
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -769,6 +770,3 @@ export default function Checkout() {
     </div>
   );
 }
-
-
-

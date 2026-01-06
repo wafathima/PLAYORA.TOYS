@@ -161,7 +161,6 @@ export default function Products() {
               {/* Image Container */}
               <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-white shadow-lg shadow-slate-200/50 mb-6">
                 <img
-                  // src={p.image ? `http://localhost:5000${p.image}` : "https://via.placeholder.com/400x500"}
                   src={p.image ? (p.image.startsWith('http') ? p.image : `http://localhost:5000${p.image}`) : "https://via.placeholder.com/400x500"}
                   className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                   alt={p.name}
