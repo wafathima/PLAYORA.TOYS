@@ -141,42 +141,56 @@ export default function Checkout() {
   const initials = getInitials(userDetails.name);
   const avatarColor = getAvatarColor(userDetails.name);
 
-  const placeOrder = async () => {
-    if (cart.length === 0) {
-      toast.error("Your cart is empty!");
-      return;
-    }
+ const placeOrder = async () => {
+  if (cart.length === 0) {
+    toast.error("Your cart is empty!");
+    return;
+  }
+  
+  if (!hasAddress) {
+    toast.error("Please select a shipping address");
+    return;
+  }
+  
+  setLoading(true);
+  try {
+    let address = selectedAddress;
     
-    if (!hasAddress) {
-      toast.error("Please select a shipping address");
-      return;
+    if (!address && userDetails.address) {
+      address = {
+        name: userDetails.name || "",
+        phone: userDetails.phone || "",
+        address: userDetails.address,
+        type: "home"
+      };
     }
+
+    console.log("Final address being sent:", address);
+
+    const response = await API.post("/user/orders/place", {
+      address: address, 
+      paymentMethod: "COD"
+    });
     
-    setLoading(true);
-    try {
-      const response = await API.post("/user/orders/place", {
-        address: selectedAddress || userDetails.address,
-        paymentMethod: "COD"
-      });
+    if (response.data.success) {
+      setIsSuccess(true);
+      setCart([]);
       
-      if (response.data.success) {
-        setIsSuccess(true);
-        
-        setCart([]);
-        
-        setTimeout(() => {
-          navigate("/orders");
-        }, 4000);
-      } else {
-        toast.error(response.data.message || "Order failed");
-      }
-    } catch (error) {
-      console.error("Order error:", error);
-      toast.error(error.response?.data?.message || "Order failed");
-    } finally {
-      setLoading(false);
+      setTimeout(() => {
+        navigate("/orders");
+      }, 4000);
+    } else {
+      toast.error(response.data.message || "Order failed");
     }
-  };
+  } catch (error) {
+    console.error("Order error:", error.response?.data || error);
+    toast.error(error.response?.data?.message || "Order failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   useEffect(() => {
     if (paymentMethod === "PAYPAL" && !paypalButtonsLoaded.current) {
@@ -250,16 +264,30 @@ export default function Checkout() {
 onApprove: async (data) => {
   setLoading(true);
   try {
+    const address = selectedAddress || {
+      name: userDetails.name,
+      phone: userDetails.phone,
+      address: userDetails.address,
+      city: "",
+      state: "",
+      country: "India",
+      postalCode: "",
+      type: "home"
+    };
+
     const res = await API.post(
       "/user/orders/paypal/capture",
-      { orderID: data.orderID }
+      { 
+        orderID: data.orderID,
+        address: address 
+      }
     );
 
     if (res.data.success) {
       toast.success("Payment successful!");
       setIsSuccess(true);
       setCart([]);
-      setTimeout(() => navigate("/orders"), 1500);
+      setTimeout(() => navigate("/orders"), 3000);
     } else {
       toast.error("Payment failed");
     }
@@ -270,8 +298,6 @@ onApprove: async (data) => {
   }
 },
 
-
-      
       onError: (err) => {
         console.error("PayPal error:", err);
         toast.error("Payment failed. Please try again.");
@@ -512,24 +538,15 @@ onApprove: async (data) => {
                 )}
 
                 {selectedAddress && (
-                  <div className="mt-6 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
-                    <div className="flex items-center gap-3 mb-3">
-                      <CheckCircle className="w-5 h-5 text-indigo-600" />
-                      <p className="text-sm font-bold text-indigo-700">
-                        Selected for delivery
-                      </p>
-                    </div>
-                    <div className="pl-8">
-                      <p className="text-sm text-indigo-900 font-medium mb-1">
-                        Deliver to: {selectedAddress.name} ({selectedAddress.phone})
-                      </p>
-                      <p className="text-sm text-indigo-700">
-                        {selectedAddress.addressLine1}{selectedAddress.addressLine2 ? `, ${selectedAddress.addressLine2}` : ''}, 
-                        {selectedAddress.city}, {selectedAddress.state} - {selectedAddress.postalCode}
-                      </p>
-                    </div>
-                  </div>
-                )}
+  <div className="mb-6 p-4 bg-slate-50 rounded-2xl text-left">
+    <p className="text-sm font-semibold text-slate-900 mb-1">Delivery Address:</p>
+    <p className="text-sm text-slate-600">
+      {selectedAddress.addressLine1 || selectedAddress.address}
+      {selectedAddress.addressLine2 ? `, ${selectedAddress.addressLine2}` : ''}<br/>
+      {selectedAddress.city}, {selectedAddress.state} - {selectedAddress.postalCode}
+    </p>
+  </div>
+)}
               </div>
             </div>
 

@@ -318,6 +318,8 @@ export default function Orders() {
                   {/* Expanded Content */}
                   {isExpanded && (
                     <div className="bg-slate-50/50 border-t border-slate-100 p-8 space-y-8 animate-in slide-in-from-top-4 duration-500">
+
+                      
                       {/* Customer Details & Shipping Address Grid */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Customer Details Section */}
@@ -381,69 +383,95 @@ export default function Orders() {
                         </div>
 
                         {/* Shipping Address Section */}
-                        <div className="space-y-4">
-                          <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3">
-                            <div className="h-px w-8 bg-slate-200"></div>
-                            Shipping Address
-                          </h4>
-                          <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
-                            {defaultAddress ? (
-                              <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                    defaultAddress.type === 'home' 
-                                      ? 'bg-emerald-50 text-emerald-600' 
-                                      : defaultAddress.type === 'work' 
-                                        ? 'bg-blue-50 text-blue-600' 
-                                        : 'bg-purple-50 text-purple-600'
-                                  }`}>
-                                    {defaultAddress.type === 'home' ? (
-                                      <Home className="w-5 h-5" />
-                                    ) : defaultAddress.type === 'work' ? (
-                                      <Briefcase className="w-5 h-5" />
-                                    ) : (
-                                      <Map className="w-5 h-5" />
-                                    )}
-                                  </div>
-                                  <div>
-                                    <h5 className="font-bold text-slate-900">{defaultAddress.name}</h5>
-                                    <p className="text-slate-600 text-sm">{defaultAddress.phone}</p>
-                                  </div>
-                                  {defaultAddress.isDefault && (
-                                    <span className="ml-auto px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase rounded-full">
-                                      Default
-                                    </span>
-                                  )}
-                                </div>
-                                
-                                <div className="space-y-2">
-                                  <p className="text-slate-900 font-medium">{defaultAddress.addressLine1}</p>
-                                  {defaultAddress.addressLine2 && (
-                                    <p className="text-slate-900 font-medium">{defaultAddress.addressLine2}</p>
-                                  )}
-                                  <p className="text-slate-600">
-                                    {defaultAddress.city}, {defaultAddress.state}, {defaultAddress.country} - {defaultAddress.postalCode}
-                                  </p>
-                                </div>
-                                
-                                <div className="pt-4 border-t border-slate-50">
-                                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                                    Shipping Type
-                                  </p>
-                                  <p className="text-sm font-bold text-indigo-600 mt-1">
-                                    {order.shippingType || "Standard Delivery"}
-                                  </p>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-center py-4">
-                                <MapPin className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                                <p className="text-slate-500 font-medium">No shipping address saved</p>
-                                <p className="text-sm text-slate-400 mt-1">Add an address in your profile</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+<div className="space-y-4">
+  <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3">
+    <div className="h-px w-8 bg-slate-200"></div>
+    Shipping Address
+  </h4>
+  <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
+    {(() => {
+      const address = order.shippingAddress;
+      
+      if (!address) {
+        return (
+          <div className="text-center py-4">
+            <MapPin className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+            <p className="text-slate-500 font-medium">Shipping address not saved</p>
+          </div>
+        );
+      }
+      
+      if (typeof address === 'string') {
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-indigo-50 text-indigo-600">
+                <Home className="w-5 h-5" />
+              </div>
+              <div>
+                <h5 className="font-bold text-slate-900">Delivery Address</h5>
+                <p className="text-slate-600 text-sm">Order #{order._id.slice(-8)}</p>
+              </div>
+            </div>
+            <p className="text-slate-700 font-medium pl-13">{address}</p>
+          </div>
+        );
+      }
+      
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              (address.type || 'home') === 'home' 
+                ? 'bg-emerald-50 text-emerald-600' 
+                : (address.type || 'home') === 'work' 
+                  ? 'bg-blue-50 text-blue-600' 
+                  : 'bg-indigo-50 text-indigo-600'
+            }`}>
+              {(address.type || 'home') === 'home' ? (
+                <Home className="w-5 h-5" />
+              ) : (address.type || 'home') === 'work' ? (
+                <Briefcase className="w-5 h-5" />
+              ) : (
+                <Map className="w-5 h-5" />
+              )}
+            </div>
+            <div>
+              <h5 className="font-bold text-slate-900">{address.name || "Customer"}</h5>
+              <p className="text-slate-600 text-sm">{address.phone || "Phone not provided"}</p>
+            </div>
+          </div>
+          
+          <div className="space-y-2 pl-13">
+            <p className="text-slate-900 font-medium">
+              {address.addressLine1 || address.address || "Address not specified"}
+            </p>
+            {address.addressLine2 && (
+              <p className="text-slate-900 font-medium">{address.addressLine2}</p>
+            )}
+            {(address.city || address.state || address.postalCode) && (
+              <p className="text-slate-600">
+                {address.city && `${address.city}, `}
+                {address.state && `${address.state}, `}
+                {address.country && `${address.country} `}
+                {address.postalCode && `- ${address.postalCode}`}
+              </p>
+            )}
+          </div>
+        </div>
+      );
+    })()}
+    
+    <div className="pt-4 border-t border-slate-50 mt-4">
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+        Shipping Type
+      </p>
+      <p className="text-sm font-bold text-indigo-600 mt-1">
+        {order.shippingType || "Standard Delivery"}
+      </p>
+    </div>
+  </div>
+</div>
                       </div>
 
                       {/* Order Items Section */}

@@ -1091,3 +1091,4 @@ function NavButton({ onClick, icon, label }) {
     </button>
   );
 }
+

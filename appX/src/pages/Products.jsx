@@ -4,8 +4,8 @@ import API from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
 import { useSearchParams } from "react-router-dom";
 import toast from 'react-hot-toast';
-import { ShoppingCart, Heart, Search, SlidersHorizontal, Star, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { ShoppingBag, Heart, Search, SlidersHorizontal, Star } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Products() {
   const { user } = useContext(AuthContext);
@@ -52,9 +52,7 @@ export default function Products() {
     }
     try {
       await API.post(`/user/wishlist/add/${id}`);
-      toast.success("Saved to favorites", {
-        style: { border: '1px solid #6366f1', color: '#e5e4eeff' }
-      });
+      toast.success("Saved to favorites");
     } catch (err) {
       toast.error("Error adding to wishlist");
     }
@@ -76,165 +74,125 @@ export default function Products() {
     }
   };
 
-  const generateRandomRating = (id) => {
-    const seed = id.charCodeAt(0) + id.charCodeAt(id.length - 1);
-    return (4.0 + (seed % 10) / 10).toFixed(1);
-  };
 
   if (loading)
     return (
-      <div className="flex flex-col justify-center items-center min-h-[60vh] gap-4">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
-          </div>
-        </div>
-        <p className="text-slate-400 font-medium animate-pulse">Curating your collection...</p>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin"></div>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-[#FCFCFD]">
-      {/* Dynamic Header Section */}
-      <section className="bg-white border-b border-slate-100 py-16 mb-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+    <div className="min-h-screen bg-white pb-20">
+      {/* Refined Header */}
+      <header className="pt-12 pb-8 px-6 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-baseline gap-4 border-b border-slate-100 pb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+              {category ? category : "All Collections"}
+            </h1>
+            <p className="text-slate-500 text-sm mt-1">{filteredProducts.length} items found</p>
+          </div>
+          
+          <div className="flex flex-wrap gap-4 w-full md:w-auto">
+            <div className="relative flex-1 md:min-w-[300px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search products..."
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all"
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <select
+              className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 outline-none cursor-pointer hover:border-slate-300"
+              onChange={(e) => setSort(e.target.value)}
+              value={sort}
             >
-              <span className="text-indigo-600 font-bold tracking-widest text-xs uppercase mb-3 block">
-                {category ? `${category} Collection` : "Full Catalog"}
-              </span>
-              <h1 className="text-5xl font-serif text-slate-900 leading-tight">
-                {category ? category : "The Playora"} <br />
-                <span className="italic font-light text-slate-500">Selection</span>
-              </h1>
-            </motion.div>
-            <p className="text-slate-500 max-w-sm text-lg leading-relaxed border-l-2 border-indigo-50 pl-6">
-              Hand-picked essentials designed to spark joy and foster development in every stage of childhood.
-            </p>
+              <option value="">Sort: Recommended</option>
+              <option value="low-high">Price: Low to High</option>
+              <option value="high-low">Price: High to Low</option>
+            </select>
           </div>
         </div>
-      </section>
+      </header>
 
       <div className="max-w-7xl mx-auto px-6">
-        {/* Search & Filter Bar */}
-        <div className="flex flex-col lg:flex-row gap-6 mb-12 items-center">
-          <div className="relative flex-1 w-full group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-            <input
-              type="text"
-              placeholder="What are you looking for today?"
-              className="w-full pl-12 pr-6 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400"
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <div className="flex items-center gap-4 w-full lg:w-auto">
-            <div className="relative flex-1 lg:flex-none min-w-[200px]">
-              <SlidersHorizontal className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
-              <select
-                className="w-full pl-10 pr-10 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm appearance-none focus:ring-4 focus:ring-indigo-50 outline-none cursor-pointer font-medium text-slate-700"
-                onChange={(e) => setSort(e.target.value)}
-                value={sort}
-              >
-                <option value="">Recommended</option>
-                <option value="low-high">Price: Low to High</option>
-                <option value="high-low">Price: High to Low</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 mb-20">
-          {filteredProducts.map((p, index) => (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              key={p._id}
-              className="group"
-            >
-              {/* Image Container */}
-              <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-white shadow-lg shadow-slate-200/50 mb-6">
-                <img
-                  src={p.image ? (p.image.startsWith('http') ? p.image : `http://localhost:5000${p.image}`) : "https://via.placeholder.com/400x500"}
-                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                  alt={p.name}
-                />
-                
-                {/* Wishlist Floating Button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToWishlist(p._id);
-                  }}
-                  className="absolute top-4 right-4 z-10 p-3 bg-white/90 backdrop-blur-md rounded-full shadow-md text-slate-400 hover:text-rose-500 hover:scale-110 active:scale-90 transition-all"
+        {/* Updated 3-Column Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <AnimatePresence>
+            {filteredProducts.map((p) => {
+              const discount = p.originalPrice ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : null;
+              
+              return (
+                <motion.div
+                  key={p._id}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="group bg-white border border-slate-400 rounded-xl overflow-hidden hover:shadow-xl hover:shadow-blue-600 transition-all duration-300"
                 >
-                  <Heart className="w-5 h-5" fill={user?.wishlist?.includes(p._id) ? "currentColor" : "none"} />
-                </button>
-
-                {/* Hover Quick View Overlay */}
-                <div 
-                  onClick={() => navigate(`/products/${p._id}`)}
-                  className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-                >
-                  <span className="px-6 py-2.5 bg-white rounded-full font-bold text-sm shadow-xl flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                    View Details <ArrowRight className="w-4 h-4" />
-                  </span>
-                </div>
-              </div>
-
-              {/* Product Details */}
-              <div className="px-2">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 
-                    className="text-xl font-serif text-slate-900 cursor-pointer hover:text-indigo-600 transition-colors line-clamp-1 flex-1"
-                    onClick={() => navigate(`/products/${p._id}`)}
-                  >
-                    {p.name}
-                  </h3>
-                  <div className="flex items-center bg-indigo-50 px-2 py-1 rounded-lg">
-                    <Star className="w-3 h-3 text-indigo-600 fill-indigo-600 mr-1" />
-                    <span className="text-xs font-bold text-indigo-700">{generateRandomRating(p._id)}</span>
+                  {/* Image Section */}
+                  <div className="relative aspect-square overflow-hidden bg-slate-50">
+                    <img
+                      src={p.image ? (p.image.startsWith('http') ? p.image : `http://localhost:5000${p.image}`) : "https://via.placeholder.com/500"}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      alt={p.name}
+                      onClick={() => navigate(`/products/${p._id}`)}
+                    />
+                    
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToWishlist(p._id);
+                      }}
+                      className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-rose-500 transition-colors border border-slate-50"
+                    >
+                      <Heart className="w-5 h-5" fill={user?.wishlist?.includes(p._id) ? "currentColor" : "none"} />
+                    </button>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-2xl font-bold text-slate-900">₹{p.price}</span>
-                  {p.originalPrice && (
-                    <span className="text-sm text-slate-400 line-through">₹{p.originalPrice}</span>
-                  )}
-                </div>
+                  {/* Content Section */}
+                  <div className="p-5">
+                    <div className="flex justify-end mb-1">
+                      <button
+                        onClick={() => addToCart(p._id)}
+                        className="flex items-center gap-2 text-blue-600 font-semibold text-sm hover:text-rose-700 transition-colors"
+                      >
+                        Add to bag <ShoppingBag className="w-4 h-4" />
+                      </button>
+                    </div>
 
-                <button
-                  onClick={() => addToCart(p._id)}
-                  className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-3 hover:bg-indigo-600 shadow-xl shadow-slate-200 transition-all active:scale-95 group-hover:shadow-indigo-100"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  Add to Bag
-                </button>
-              </div>
-            </motion.div>
-          ))}
+                    <h3 
+                      className="text-lg font-bold text-slate-800 leading-snug mb-2 cursor-pointer hover:text-blue-600 line-clamp-2 min-h-[3.5rem]"
+                      onClick={() => navigate(`/products/${p._id}`)}
+                    >
+                      {p.name}
+                    </h3>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {p.originalPrice && (
+                        <span className="text-slate-400 line-through text-sm font-medium">₹{p.originalPrice}</span>
+                      )}
+                      <span className="text-xl font-bold text-green-800 text-[1.1rem]">₹{p.price}</span>
+        
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </div>
 
-        {/* Enhanced Empty State */}
+        {/* Empty State */}
         {filteredProducts.length === 0 && (
-          <div className="text-center py-32 bg-white rounded-[3rem] border border-dashed border-slate-200 mb-20">
-            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Search className="w-10 h-10 text-slate-300" />
-            </div>
-            <h3 className="text-2xl font-serif text-slate-900 mb-2">No matches found</h3>
-            <p className="text-slate-500 max-w-xs mx-auto mb-8">
-              We couldn't find what you were looking for. Try a different search term or category.
-            </p>
+          <div className="text-center py-20">
+            <Search className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+            <p className="text-slate-500 font-medium">No products match your search.</p>
             <button 
-              onClick={() => {setSearch(""); fetchProducts();}}
-              className="px-8 py-3 bg-indigo-50 text-indigo-700 rounded-full font-bold text-sm hover:bg-indigo-100 transition-all"
+              onClick={() => setSearch("")}
+              className="mt-4 text-blue-600 font-bold hover:underline"
             >
               Clear all filters
             </button>

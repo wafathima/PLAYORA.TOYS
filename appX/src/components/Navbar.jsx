@@ -64,7 +64,7 @@ export default function Navbar() {
         {/* Logo Section */}
         <Link to="/" className="flex items-center space-x-2 transition-transform hover:scale-105 active:scale-95">
           <img
-            src="/playora.png"
+            src="playora.png"
             alt="logo"
             className="w-auto h-10 lg:h-12 object-contain"
           />
