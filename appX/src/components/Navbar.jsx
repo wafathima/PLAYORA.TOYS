@@ -2,6 +2,8 @@ import { useContext, useState, useRef, useEffect } from "react";
 import { Link, useNavigate,useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ShoppingCart, Heart, User, LogOut, Package, Settings, ChevronDown, Menu } from "lucide-react";
+import Playora from "../assets/Playora.png";
+
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
@@ -64,7 +66,7 @@ export default function Navbar() {
         {/* Logo Section */}
         <Link to="/" className="flex items-center space-x-2 transition-transform hover:scale-105 active:scale-95">
           <img
-            src="playora.png"
+            src={Playora}
             alt="logo"
             className="w-auto h-10 lg:h-12 object-contain"
           />
