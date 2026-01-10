@@ -10,7 +10,7 @@ const app = express();
 connectDB();
 
 app.use(cors({
-  origin: "*",
+  origin: "https://playora-toys-frontend.onrender.com",
   credentials: true
 }));
 
