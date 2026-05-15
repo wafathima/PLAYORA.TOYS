@@ -1,9 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-
-
-  baseURL: "https://playora-backend.onrender.com/api",
+  baseURL: "https://playora-toys-backend.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -18,7 +16,7 @@ API.interceptors.request.use((config) => {
 });
 
 export const adminAPI = axios.create({
-  baseURL: "https://playora-backend.onrender.com/api",
+  baseURL: "https://playora-toys-backend.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
