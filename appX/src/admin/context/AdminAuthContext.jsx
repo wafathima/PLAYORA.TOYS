@@ -28,7 +28,7 @@ export const AdminAuthProvider = ({ children }) => {
 
   const adminLogin = async (email, password) => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/auth/login", {
+      const res = await fetch("https://playora-backend.onrender.com/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
